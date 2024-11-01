@@ -97,7 +97,6 @@ class Peer:
             print("Connected peers:")
             for peer in self.connected_peers:
                 print(peer)
-
 def main():
     peer = Peer(peer_id='peer2', peer_port = 5002, tracker_ip='127.0.0.1', tracker_port=8000)
     

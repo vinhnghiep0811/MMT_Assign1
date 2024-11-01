@@ -8,7 +8,6 @@ file_registry = {}
 peer_list = {}
 file_peers = {}
 metainfo_file = "metainfo.txt"
-
 def stop_tracker_server():
     global running
     running = False
