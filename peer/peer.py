@@ -37,7 +37,6 @@ class Peer:
                 print("This file has already been uploaded by this peer.")
             else:
                 print("Upload failed or an unexpected response was received.")
-
     def register_with_tracker(self):
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             s.connect((self.tracker_ip, self.tracker_port))
