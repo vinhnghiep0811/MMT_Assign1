@@ -20,7 +20,6 @@ class Peer:
         except FileNotFoundError:
             print(f"File {file_path} not found.")
             return None
-
     def upload_file(self, file_name):
         file_path = os.path.join(os.path.dirname(__file__), "repo", file_name)
         file_hash = self.generate_file_hash(file_path)
