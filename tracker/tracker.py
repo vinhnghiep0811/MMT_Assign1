@@ -23,12 +23,13 @@ def remove_peer(peer_ip, peer_port, torrent):
 def tracker_thread(addr, conn, msg):
     #TODO DECODE MESSAGE
     action = ''
-    byte_acquired = 0
+    piece_acquired = 0
     if action == 'start':
         torrent_exist, peerlist = add_peer()
         if torrent_exist == 0: send_list(peerlist, addr, )
-        elif byte_acquired > 0:
+        elif piece_acquired > 0:
             add_torrent()
+            send_list()
     elif action == 'stop':
         remove_peer()
     elif action == 'done':
