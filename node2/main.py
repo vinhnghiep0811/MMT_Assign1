@@ -14,8 +14,8 @@ def load_tracker_config(file_path):
 
 class Peer:
 
-    def __init__(self, peer_id, peer_port, tracker_ip, tracker_port):
-        self.peer_id = peer_id
+    def __init__(self, peer_port, tracker_ip, tracker_port):
+        self.peer_id = -1
         self.peer_port = peer_port
         self.tracker_ip = tracker_ip
         self.tracker_port = tracker_port
@@ -26,7 +26,7 @@ class Peer:
     def start_server(self):
         self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.server_socket.bind((socket.gethostbyname(socket.gethostname()), self.peer_port))
-        self.server_socket.listen(5)  # Lắng nghe tối đa 5 kết nối
+        self.server_socket.listen(5) 
         print(f"Listening for incoming connections...")
 
         while True:
@@ -125,17 +125,16 @@ class Peer:
                 piece_index += 1
         return self.pieces
 
-    def register_with_tracker(self, metainfo):
+    def register_with_tracker(self, torrent):
         try:
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             # Connect to the tracker
             s.connect((self.tracker_ip, self.tracker_port))
             message = {
                 "action": "register",
-                "peer_id": self.peer_id,
                 "peer_ip": socket.gethostbyname(socket.gethostname()),
                 "peer_port": self.peer_port,
-                "metainfo": metainfo
+                "torrent": torrent
             }
             s.sendall(json.dumps(message).encode())
             response = s.recv(1024).decode()
@@ -155,8 +154,11 @@ class Peer:
             file_list = json.loads(response)
             print("Files available on the tracker:", file_list)
         except Exception as e:
-            print("An error occurred while retrieving file list:", e)
+            print("An error occurred while retrieving file list:", e) 
     
+    def register_with_tracker(self, tracker_ip, tracker_port, torrent_id):
+        pass
+
     def request_peers(self, file_name):
         try:
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -178,7 +180,6 @@ class Peer:
         except Exception as e:
             print("An error occurred while requesting file peers:", e)
         
-
     def connect_to_peer(self, peer):
         peer_id = peer["peer_id"]
         peer_ip = peer["peer_ip"]
@@ -299,25 +300,29 @@ class Peer:
         server_thread.daemon = True
         server_thread.start()
 
+node_list = []
+
 def main():
-    tracker_config_path = r'D:\Nam 3\MMT\BTL\P2P\CO3093\tracker\config.json'
+    """ tracker_config_path = r'D:\Nam 3\MMT\BTL\P2P\CO3093\tracker\config.json'
     tracker_ip, tracker_port = load_tracker_config(tracker_config_path)  # Đọc IP và cổng từ file
     tracker_address = (tracker_ip, tracker_port)
     print(f"Connecting to tracker at {tracker_address}")
     peer = Peer(peer_id='peer1', peer_port = 5001, tracker_ip = tracker_ip, tracker_port = tracker_port)
     peer.start()
     time.sleep(0.5)
-    print("Please type your command:")
+    print("Please type your command:") """
     
     while True:
         command = input("Command: ").strip().lower()
         
-        if command.startswith("start"):
-            file_name = command.split(" ", 1)[1]
-            metainfo = peer.create_metainfo(file_name)
-            peer.register_with_tracker(metainfo)
-        elif command == "get":
-            peer.get_all_files()
+        if command.startswith("register"):
+            tracker_ip = command.split(" ", 1)[1]
+            tracker_port = command.split(" ", 1)[2]
+            torrent_id = command.split(" ", 1)[3]
+            peer = Peer(5001, tracker_ip, tracker_port)
+            node_list.append(peer)
+            response = peer.register_with_tracker(tracker_ip, tracker_port, torrent_id)
+            print(response)
         elif command.startswith("request"):
             file_name = command.split(" ", 1)[1]
             peer.request_peers(file_name)
