@@ -17,10 +17,16 @@ class Peer:
         self.queues = [] #manage queues of unacquired pieces
         self.files = {}
         """ {file_id : 
-            {"peer_list" : 
-                {peer_id : { "ip" : "", "port" : "", "list" : ""}}
-            }
-        } """
+                {"peer_list" : 
+                    [{"peer_id": 1, 
+                    "peer_ip": "192.168.56.1",
+                    "peer_port": 5001,
+                    "piece_list": {} }
+                    ],
+                "retrieved_pieces" : {}
+                }
+            } """
+        #Queues, piece_list, retrieved_list lưu sao tùy bạn nha
     def register_to_torrent(self, tracker_ip, tracker_port, torrent):
         #send message to torrent
         try:
@@ -76,12 +82,12 @@ class Peer:
                 "action" : "request",
                 "file_id" : file_id,
                 "torrent_id" : self.torrent,
-                "peer_id" : self.peer_id
+                "peer_id" : self.peer_id,
             }
             s.sendall(json.dumps(message).encode())
             response = json.loads(s.recv(1024).decode())
             if response.get("status") == "yes":
-                self.files.update({file_id : {"peer_list" : response.get("peer_list")}})
+                self.files.update({file_id : {"peer_list" : response.get("peer_list"), "retrieved_pieces": {}}})
                 print(self.files)
                 print("Get peer info succeed. Start downloading.")
             elif response.get("status") == "found_in_tracker":

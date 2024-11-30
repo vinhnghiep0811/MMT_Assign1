@@ -1,43 +1,5 @@
-1. register peer:
-message content: ip, port, torrent
-procedure:
-- receive message
-- parse message
-- get torrent from message, check if torrent exist.
-    + if not, find torrent
-        + if torrent found, send back torrent info
-        + if not, send error.
-    + if torrent found, write peer info to peerlist (each torrent has its own peer list).
-- send back result.
-
-2. request list:
-message content: torrent, file id, no. of pieces, piece list.
-procedure:
-- find file in current torrent
-    + if found, write peer info to torrent file, send ack msg.
-    + if not, try find in other torrent.
-        + if found, send back torrent info to peer
-        + if not, try find in other trackers.
-            + if found, send back torrent and tracker info.
-            + if not, send error message.
-
-3. quit:
-tba 
-
-------------------------------------------------------------------------------------------
-1. start_session:
-- for initialization
-- client process for now
-
-2. register_to_tracker
-- send message
-- handle response
-    +success: update data
-    +suggestion: y/n 
-    +fail: quit session 
-
-- request peerlist: giống cái trước 
-
-Note:
-- Modify tracker init
+- Chạy tracker trước để lấy ip và port
+- Cú pháp lệnh register: register ip port torrent (torrent 1 hoặc 2)
+- Cú pháp lệnh request: request fileid1 
+- Lấy được peer list thì upload/download luôn không cần người dùng nhập lệnh
 

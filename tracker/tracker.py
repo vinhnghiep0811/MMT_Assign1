@@ -53,7 +53,9 @@ def register_peer(message):
             if peer["peer_ip"] == peer_ip and peer["peer_port"] == peer_port:
                 id = peer["peer_id"]
         if id == -1: #not registered
-            torrent_file["peer_list"].append({"peer_id": torrent_file["peer_number"]+1,"peer_ip": peer_ip, "peer_port":peer_port})
+            torrent_file["peer_list"].append({"peer_id": torrent_file["peer_number"]+1,
+                                              "peer_ip": peer_ip,
+                                              "peer_port":peer_port})
             peer_id=torrent_file["peer_number"]+1
             torrent_file["peer_number"] = peer_id
             with open(file_name, "w") as file:
@@ -73,12 +75,15 @@ def get_peers(message):
         torrent_file = {}
         with open("tracker/torrent" + torrent + ".json", "r") as file:
             torrent_file = json.load(file)
+        if peer_id not in torrent_file["file_list"][file_id]["peers"]:
+            torrent_file["file_list"][file_id]["peers"].append(peer_id)
         peer_list_id = torrent_file["file_list"][file_id]["peers"]
         for peer in torrent_file["peer_list"]:
             if peer["peer_id"] in peer_list_id:
-                peer_list.append(peer)
-        if peer not in torrent_file["file_list"][file_id]["peers"]:
-            torrent_file["file_list"][file_id]["peers"].append(peer_id)
+                peer_to_add = {}
+                peer_to_add.update(peer)
+                peer_to_add.update({"pieces_list" : {}})
+                peer_list.append(peer_to_add)
         with open("tracker/torrent" + torrent + ".json", "w") as file:
             json.dump(torrent_file, file)
         return {"status" : "yes", "peer_list" : peer_list}
