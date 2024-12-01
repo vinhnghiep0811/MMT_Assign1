@@ -75,6 +75,8 @@ def get_peers(message):
         torrent_file = {}
         with open("tracker/torrent" + torrent + ".json", "r") as file:
             torrent_file = json.load(file)
+        pieces_number = torrent_file["file_list"][file_id]["number_of_pieces"]
+        piece_size = torrent_file["file_list"][file_id]["piece_size"]
         if peer_id not in torrent_file["file_list"][file_id]["peers"]:
             torrent_file["file_list"][file_id]["peers"].append(peer_id)
         peer_list_id = torrent_file["file_list"][file_id]["peers"]
@@ -86,7 +88,7 @@ def get_peers(message):
                 peer_list.append(peer_to_add)
         with open("tracker/torrent" + torrent + ".json", "w") as file:
             json.dump(torrent_file, file)
-        return {"status" : "yes", "peer_list" : peer_list}
+        return {"status" : "yes", "peer_list" : peer_list, "number_of_pieces" : pieces_number, "piece_size" : piece_size}
 
 
 

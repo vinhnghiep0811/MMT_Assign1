@@ -14,7 +14,7 @@ class Peer:
         self.tracker_ip = None
         self.tracker_port = None
         self.torrent = None
-        self.queues = [] #manage queues of unacquired pieces
+        self.queues = {} #manage queues of unacquired pieces
         self.files = {}
         """ {file_id : 
                 {"peer_list" : 
@@ -71,6 +71,7 @@ class Peer:
         except Exception as e:
             print("An error occurred while registering with the tracker:", e)
 
+
     def request_peer_list(self, file_id):
         if self.peer_id == -1:
             print("Please join a torrent first!")
@@ -87,7 +88,8 @@ class Peer:
             s.sendall(json.dumps(message).encode())
             response = json.loads(s.recv(1024).decode())
             if response.get("status") == "yes":
-                self.files.update({file_id : {"peer_list" : response.get("peer_list"), "retrieved_pieces": {}}})
+                self.files.update({file_id : {"peer_list" : response.get("peer_list"), "acquired_pieces": {}, "number_of_pieces" : response.get("number_of_pieces"), "piece_size" : response.get("piece_size")}})
+                self.queues.update({ file_id : PriorityQueue(response.get("number_of_pieces"))})
                 print(self.files)
                 print("Get peer info succeed. Start downloading.")
             elif response.get("status") == "found_in_tracker":
