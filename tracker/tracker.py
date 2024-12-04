@@ -149,8 +149,8 @@ def remove_peer(message):
         torrent_file["peer_list"].pop(idx)
         torrent_file["peer_number"] -= 1
         for file in torrent_file["file_list"]:
-            if peer_id in torrent_file[file]["peers"]:
-                file["peers"].remove(peer_id)
+            if peer_id in torrent_file["file_list"][file]["peers"]:
+                torrent_file["file_list"][file]["peers"].remove(peer_id)
         with open(path, "w") as file:
             json.dump(torrent_file, file)
         return {"message" : "Leave succeed."}

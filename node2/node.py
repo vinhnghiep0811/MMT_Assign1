@@ -125,7 +125,7 @@ class Peer:
             number_of_pieces = ceil(size/piece_size)
         else:
             print("File not found.")
-            pass
+            return
         try:
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             s.connect((self.tracker_ip, self.tracker_port))
