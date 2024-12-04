@@ -3,7 +3,7 @@ import sys
 import socket
 from threading import Thread
 
-torrent_table = {"1" : ["fileid1"],"2" : {}}
+torrent_table = {"1" : [],"2" : []}
 peer_list = {}
 tracker_id = 1
 
@@ -71,7 +71,7 @@ def get_peers(message):
     if file_id not in torrent_table[torrent]:
         return find_file_info(file_id)
     else:
-        peer_list = []
+        peer_list = [] 
         torrent_file = {}
         with open("tracker/torrent" + torrent + ".json", "r") as file:
             torrent_file = json.load(file)
@@ -90,11 +90,70 @@ def get_peers(message):
             json.dump(torrent_file, file)
         return {"status" : "yes", "peer_list" : peer_list, "number_of_pieces" : pieces_number, "piece_size" : piece_size}
 
+def add_file(message):
+    file_id = message.get("file_id") 
+    torrent = message.get("torrent")
+    peer_id = message.get("peer_id")
+    number_of_pieces = message.get("number_of_pieces")
+    piece_size = message.get("piece_size")
+    if file_id not in torrent_table[torrent]:
+        torrent_table[torrent].append(file_id)
+        path = "tracker/torrent" + torrent + ".json"
+        torrent_file = {}
+        with open(path, "r") as file:
+            torrent_file = json.load(file)
+        torrent_file["file_list"].update({
+            file_id : {
+                "peers" : [peer_id],
+                "number_of_pieces" : number_of_pieces,
+                "piece_size" : piece_size}})
+        with open(path, "w") as file:
+            json.dump(torrent_file, file)
+        return {"message" : "File added."}
+    else:
+        return {"message" : "There has already a file with the same id in torrent."}
 
 
-def remove_peer(msg):
-    #TODO
-    pass 
+def remove_peer_from_file(message):
+    torrent = message.get("torrent")
+    file_id = message.get("file_id")
+    if file_id not in torrent_table[torrent]:
+        return {"message" : "No such file found."}
+    peer_id = message.get("peer_id")
+    path = "tracker/torrent" + torrent + ".json"
+    torrent_file = {}
+    with open(path, "r") as file:
+        torrent_file = json.load(file)
+    if peer_id in torrent_file["file_list"][file_id]["peers"]:
+        torrent_file["file_list"][file_id]["peers"].remove(peer_id)
+        with open(path, "w") as file:
+            json.dump(torrent_file, file)
+        return {"message" : "Stop sharing/receiving file succeed."}
+    else: return {"message" : "Peer has not started sharing this file yet."}
+
+def remove_peer(message):
+    torrent = message.get("torrent")
+    peer_id = message.get("peer_id")
+    path = "tracker/torrent" + torrent + ".json"
+    torrent_file = {}
+    with open(path, "r") as file:
+        torrent_file = json.load(file)
+    if torrent not in torrent_table:
+        return {"message" : "No such torrent was found."}
+    for peer in torrent_file["peer_list"]:
+        if peer["peer_id"]==int(peer_id):
+            idx = torrent_file["peer_list"].index(peer)
+    if idx == -1:
+        return {"message" : "Peer has not been registered yet."}
+    else:
+        torrent_file["peer_list"].pop(idx)
+        torrent_file["peer_number"] -= 1
+        for file in torrent_file["file_list"]:
+            if peer_id in torrent_file[file]["peers"]:
+                file["peers"].remove(peer_id)
+        with open(path, "w") as file:
+            json.dump(torrent_file, file)
+        return {"message" : "Leave succeed."}
 
 def tracker_thread(conn):
     try:
@@ -107,9 +166,15 @@ def tracker_thread(conn):
         elif action== "request":
             response = get_peers(message)
             conn.sendall(json.dumps(response).encode())
+        elif action== "add":
+            response = add_file(message)
+            conn.sendall(json.dumps(response).encode())
+        elif action == "stop":
+            response = remove_peer_from_file(message)
+            conn.sendall(json.dumps(response).encode())
         elif action == "quit":
             response = remove_peer(message)
-            conn.sendall(response.encode())
+            conn.sendall(json.dumps(response).encode())
         else:
             conn.sendall("Error: Unknown action".encode())
     except json.JSONDecodeError:
@@ -154,5 +219,14 @@ if __name__ == "__main__":
     port = 22236
     tracker_id = 1
     save_tracker_config(hostip, port)
+    #reset torrents
+    for torrent in torrent_table.keys():
+        path = "tracker/torrent" + torrent + ".json"
+        with open(path, "w") as file:
+            json.dump(
+                {"peer_list" : [],
+                "peer_number" : 0,
+                "file_list" : {}}
+            , file)
     print("Listening on: {}:{}".format(hostip,port))
     server_program(hostip, port)

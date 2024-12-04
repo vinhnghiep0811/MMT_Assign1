@@ -1,0 +1,96 @@
+Store-and-Forward Transmission
+Most packet switches use store-and-forward transmission at the inputs to the
+links. Store-and-forward transmission means that the packet switch must receive
+the entire packet before it can begin to transmit the first bit of the packet onto the
+outbound link. To explore store-and-forward transmission in more detail, consider
+a simple network consisting of two end systems connected by a single router, as
+shown in Figure 1.11. A router will typically have many incident links, since its
+job is to switch an incoming packet onto an outgoing link; in this simple example,
+the router has the rather simple task of transferring a packet from one (input) link
+to the only other attached link. In this example, the source has three packets, each
+consisting of L bits, to send to the destination. At the snapshot of time shown in
+Figure 1.11, the source has transmitted some of packet 1, and the front of packet 1
+has already arrived at the router. Because the router employs store-and-forwarding,
+at this instant of time, the router cannot transmit the bits it has received; instead it
+must first buffer (i.e., “store”) the packet’s bits. Only after the router has received
+all of the packet’s bits can it begin to transmit (i.e., “forward”) the packet onto the
+outbound link. To gain some insight into store-and-forward transmission, let’s now
+calculate the amount of time that elapses from when the source begins to send the
+packet until the destination has received the entire packet. (Here we will ignore
+propagation delay—the time it takes for the bits to travel across the wire at near
+the speed of light—which will be discussed in Section 1.4.) The source begins to
+transmit at time 0; at time L/R seconds, the source has transmitted the entire packet,
+and the entire packet has been received and stored at the router (since there is no
+propagation delay). At time L/R seconds, since the router has just received the entire
+packet, it can begin to transmit the packet onto the outbound link towards the destination; at time 2L/R, the router has transmitted the entire packet, and the entire
+packet has been received by the destination. Thus, the total delay is 2L/R. If the52 CHAPTER 1    •    COMPUTER NETWORKS AND THE INTERNET
+switch instead forwarded bits as soon as they arrive (without first receiving the entire
+packet), then the total delay would be L/R since bits are not held up at the router.
+But, as we will discuss in Section 1.4, routers need to receive, store, and process the
+entire packet before forwarding.
+Now let’s calculate the amount of time that elapses from when the source begins
+to send the first packet until the destination has received all three packets. As before,
+at time L/R, the router begins to forward the first packet. But also at time L/R the
+source will begin to send the second packet, since it has just finished sending the
+entire first packet. Thus, at time 2L/R, the destination has received the first packet
+and the router has received the second packet. Similarly, at time 3L/R, the destination has received the first two packets and the router has received the third packet.
+Finally, at time 4L/R the destination has received all three packets!
+Let’s now consider the general case of sending one packet from source to destination over a path consisting of N links each of rate R (thus, there are N-1 routers
+between source and destination). Applying the same logic as above, we see that the
+end-to-end delay is:
+dend@to@end = N
+L R
+(1.1)
+You may now want to try to determine what the delay would be for P packets sent
+over a series of N links.
+Queuing Delays and Packet Loss
+Each packet switch has multiple links attached to it. For each attached link, the
+packet switch has an output buffer (also called an output queue), which stores
+packets that the router is about to send into that link. The output buffers play a key
+role in packet switching. If an arriving packet needs to be transmitted onto a link but
+finds the link busy with the transmission of another packet, the arriving packet must
+wait in the output buffer. Thus, in addition to the store-and-forward delays, packets
+suffer output buffer queuing delays. These delays are variable and depend on the
+level of congestion in the network. Since the amount of buffer space is finite, an
+Figure 1.11 ♦ Store-and-forward packet switching
+Source
+R bps
+12
+Front of packet 1 Destination
+stored in router,
+awaiting remaining
+bits before forwarding
+31.3 • THE NETWORK CORE 53
+arriving packet may find that the buffer is completely full with other packets waiting
+for transmission. In this case, packet loss will occur—either the arriving packet or
+one of the already-queued packets will be dropped.
+Figure 1.12 illustrates a simple packet-switched network. As in Figure 1.11,
+packets are represented by three-dimensional slabs. The width of a slab represents
+the number of bits in the packet. In this figure, all packets have the same width and
+hence the same length. Suppose Hosts A and B are sending packets to Host E. Hosts
+A and B first send their packets along 100 Mbps Ethernet links to the first router.
+The router then directs these packets to the 15 Mbps link. If, during a short interval
+of time, the arrival rate of packets to the router (when converted to bits per second)
+exceeds 15 Mbps, congestion will occur at the router as packets queue in the link’s
+output buffer before being transmitted onto the link. For example, if Host A and B
+each send a burst of five packets back-to-back at the same time, then most of these
+packets will spend some time waiting in the queue. The situation is, in fact, entirely
+analogous to many common-day situations—for example, when we wait in line for a
+bank teller or wait in front of a tollbooth. We’ll examine this queuing delay in more
+detail in Section 1.4.
+Forwarding Tables and Routing Protocols
+Earlier, we said that a router takes a packet arriving on one of its attached communication links and forwards that packet onto another one of its attached communication
+links. But how does the router determine which link it should forward the packet
+onto? Packet forwarding is actually done in different ways in different types of
+computer networks. Here, we briefly describe how it is done in the Internet.
+Figure 1.12 ♦ Packet switching
+100 Mbps Ethernet
+Key:
+Packets
+A B
+C
+D E
+15 Mbps
+Queue of
+packets waiting
+for output link54 CHAPTER 1    •    COMPUTER NETWORKS AND THE INTERN
