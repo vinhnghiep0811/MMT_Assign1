@@ -119,9 +119,10 @@ class Peer:
         if self.peer_id == -1:
             print("Please join a torrent first!")
             pass
-        if os.path.exists(file_name):
+        path = os.path.abspath(file_name)
+        if os.path.exists(path):
             piece_size = 128
-            size = os.path.getsize(file_name)
+            size = os.path.getsize(path)
             number_of_pieces = ceil(size/piece_size)
         else:
             print("File not found.")
