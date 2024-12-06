@@ -240,7 +240,7 @@ class Peer:
             response = json.loads(received_data.decode())
             piece_list = response.get("pieces", [])
             s.close()
-            print(f"Received piece list from peer: {ip} : {port}")
+            print(f"Received piece list for file {file_id} from peer: {ip} : {port}")
             return piece_list
 
         except Exception as e:
@@ -262,7 +262,7 @@ class Peer:
         while not self.queues[file_id].empty():
             piece = self.queues[file_id].get()
             piece_id = piece["id"]
-            print(f"Downloading piece: ID = {piece_id}")
+            print(f"Downloading piece for file {file_id}: ID = {piece_id}")
             thread = Thread(target=self.download_piece, args=(piece_id, peer_piece_map, file_id))
             threads.append(thread)
             thread.start()
@@ -285,10 +285,10 @@ class Peer:
                             piece["data"] = piece_data["data"]
                             piece["status"] = piece_data["status"]
                             break
-                    print(f"Successfully downloaded piece {piece_id} and added to pieces.")
+                    print(f"Successfully downloaded piece {piece_id} in file {file_id} and added to pieces.")
                     break
                 else:
-                    print(f"Failed to download piece {piece_id} from peer {peer_ip}:{peer_port}.")
+                    print(f"Failed to download piece {piece_id} in file {file_id} from peer {peer_ip}:{peer_port}.")
             else:
                 print(f"Piece {piece_id} not available from any peers.")
 
@@ -297,7 +297,7 @@ class Peer:
         try:
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             s.connect((peer_ip, peer_port))
-            print(f"Requesting piece {piece_id} from peer {peer_ip}:{peer_port}")
+            print(f"Requesting piece {piece_id} in file {file_id} from peer {peer_ip}:{peer_port}")
             request = {"action": "download_piece", "piece_id": piece_id, "file_id": file_id}
             s.sendall(json.dumps(request).encode())
             # response = s.recv(4096)  # Receive the piece data    
@@ -326,7 +326,7 @@ class Peer:
 
                 # Lưu thông tin file_name với file_id
                 self.add_file_mapping(file_id, file_name)
-                print(f"Received piece {piece_id} data from peer {peer_ip}:{peer_port}, size: {len(data)} bytes")
+                print(f"Received piece {piece_id} data in file {file_id} from peer {peer_ip}:{peer_port}, size: {len(data)} bytes")
                 
                 s.close()  # Đóng kết nối sau khi nhận xong
                 return piece_data
@@ -335,7 +335,7 @@ class Peer:
                 s.close()
                 return None
         except Exception as e:
-            print(f"Error requesting piece {piece_id} from peer {peer_ip}:{peer_port}: {e}")
+            print(f"Error requesting piece {piece_id} in file {file_id} from peer {peer_ip}:{peer_port}: {e}")
             return None
 
     # Hàm ghép
@@ -530,10 +530,11 @@ def main():
             node_list.append(peer)
             peer.register_to_torrent(tracker_ip, tracker_port, torrent_id)
         elif command.startswith("request"):
-            file_id = command.split(" ", 1)[1]
-            thread = threading.Thread(target=peer.handle_request, args=(file_id,))
-            threads.append(thread)
-            thread.start()
+            file_ids = command.split(" ", 1)[1].split()  # Lấy các file_id, tách theo khoảng trắng
+            for file_id in file_ids:
+                thread = threading.Thread(target=peer.handle_request, args=(file_id,))
+                threads.append(thread)
+                thread.start()
         elif command.startswith("add"):
             file_name = command.split(" ")[1]
             file_id = command.split(" ")[2]

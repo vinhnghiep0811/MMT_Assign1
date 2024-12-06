@@ -530,10 +530,11 @@ def main():
             node_list.append(peer)
             peer.register_to_torrent(tracker_ip, tracker_port, torrent_id)
         elif command.startswith("request"):
-            file_id = command.split(" ", 1)[1]
-            thread = threading.Thread(target=peer.handle_request, args=(file_id,))
-            threads.append(thread)
-            thread.start()
+            file_ids = command.split(" ", 1)[1].split()  # Lấy các file_id, tách theo khoảng trắng
+            for file_id in file_ids:
+                thread = threading.Thread(target=peer.handle_request, args=(file_id,))
+                threads.append(thread)
+                thread.start()
         elif command.startswith("add"):
             file_name = command.split(" ")[1]
             file_id = command.split(" ")[2]
