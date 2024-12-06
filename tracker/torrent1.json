@@ -1,1 +1,1 @@
-{"peer_list": [], "peer_number": 0, "file_list": {"fileid1": {"peers": [], "number_of_pieces": 52, "piece_size": 128}}}
+{"peer_list": [{"peer_id": 1, "peer_ip": "10.0.153.175", "peer_port": 5001}, {"peer_id": 2, "peer_ip": "10.0.153.175", "peer_port": 5002}, {"peer_id": 3, "peer_ip": "10.0.153.175", "peer_port": 5003}], "peer_number": 3, "file_list": {"1": {"peers": [2, 3, 1], "number_of_pieces": 12, "piece_size": 20480}}}

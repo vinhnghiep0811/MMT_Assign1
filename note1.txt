@@ -1,0 +1,8 @@
+Test thử với node2 download file từ 2 node 3 và 4
+- Đăng ký 3 node 
+- Ở node 3 nhập add để thêm vào torrent
+- Ở node 4 nhập add, sau đó nhập request để thêm vào list peer
+- Ở node 2 nhập request, lúc này sẽ tải đồng thời từ node 3 và 4
+
+nên đặt piece size đủ lớn để có khoảng trên dưới 15 pieces, phục vụ cho việc test, lúc nộp thì chắc set 512KB là an toàn nhất
+nhiều pieces quá sẽ gây ra lỗi (không fix được)

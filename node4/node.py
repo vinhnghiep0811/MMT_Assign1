@@ -514,7 +514,7 @@ class Peer:
 node_list = []
 
 def main():
-    peer = Peer(5001)
+    peer = Peer(5003)
     peer.start()
     time.sleep(0.5)
 
